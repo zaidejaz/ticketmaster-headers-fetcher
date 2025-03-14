@@ -1,0 +1,43 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add SSH known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Copy files to server
+        run: |
+          # Create necessary directories
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "mkdir -p /opt/header-fetcher"
+          
+          # Copy required files (excluding proxies.json)
+          scp server.js ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
+          scp package.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
+          scp deploy.sh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
+          
+          # Make deploy script executable
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "chmod +x /opt/header-fetcher/deploy.sh /opt/header-fetcher/puppeteer-install.sh"
+          
+          echo "Files successfully copied to server"
+
+      - name: Notify deployment
+        run: |
+          echo "Deployment files are copied to server"
+          echo "Please create proxies.json manually on the server"
+          echo "Then run deploy.sh manually on the server to complete deployment"
