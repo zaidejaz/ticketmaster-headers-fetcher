@@ -30,7 +30,8 @@ jobs:
           scp server.js ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
           scp package.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
           scp deploy.sh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
-          
+          scp header-fetcher.js ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/header-fetcher/
+
           # Make deploy script executable
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "chmod +x /opt/header-fetcher/deploy.sh"
           
